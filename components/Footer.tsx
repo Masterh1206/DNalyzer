@@ -1,10 +1,14 @@
+
 import React from 'react';
 
+// FIX: Added 'onViewChange' to props to handle view switching for non-modal links like 'Blog'.
+// This separates concerns between opening modals (onLinkClick) and changing views (onViewChange).
 interface FooterProps {
-  onLinkClick: (modal: 'about' | 'contact' | 'privacy' | 'terms') => void;
+  onLinkClick: (modal: 'about' | 'contact' | 'privacy' | 'terms' | 'disclaimer') => void;
+  onViewChange: (view: 'analyzer' | 'trends' | 'blog') => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
+const Footer: React.FC<FooterProps> = ({ onLinkClick, onViewChange }) => {
   const linkStyles = "cursor-pointer text-sm text-brand-text-secondary hover:text-brand-text-primary transition-colors";
 
   return (
@@ -17,14 +21,17 @@ const Footer: React.FC<FooterProps> = ({ onLinkClick }) => {
                     &copy; {new Date().getFullYear()}. All rights reserved.
                 </p>
                  <p className="text-sm text-brand-text-secondary mt-1">
-                    Made with ❤️ by Hamza Hallou
+                    An AI-powered tool for domain investors.
                 </p>
             </div>
-            <nav className="flex items-center space-x-4 sm:space-x-6">
+            <nav className="flex items-center space-x-4 sm:space-x-6 flex-wrap justify-center">
             <button onClick={() => onLinkClick('about')} className={linkStyles}>About</button>
+            {/* FIX: Changed onClick to use 'onViewChange' to switch to the blog view instead of incorrectly calling 'onLinkClick'. */}
+            <button onClick={() => onViewChange('blog')} className={linkStyles}>Blog</button>
             <button onClick={() => onLinkClick('contact')} className={linkStyles}>Contact</button>
-            <button onClick={() => onLinkClick('privacy')} className={linkStyles}>Privacy Policy</button>
-            <button onClick={() => onLinkClick('terms')} className={linkStyles}>Terms of Service</button>
+            <button onClick={() => onLinkClick('privacy')} className={linkStyles}>Privacy</button>
+            <button onClick={() => onLinkClick('terms')} className={linkStyles}>Terms</button>
+            <button onClick={() => onLinkClick('disclaimer')} className={linkStyles}>Disclaimer</button>
             </nav>
         </div>
       </div>

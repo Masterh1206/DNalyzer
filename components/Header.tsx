@@ -1,18 +1,19 @@
 
 import React from 'react';
 import { DnaIcon } from './icons.tsx';
+import type { ViewType } from '../types.ts';
 
 interface HeaderProps {
   onLinkClick: (modal: 'about' | 'contact' | 'privacy' | 'terms') => void;
-  activeView: 'analyzer' | 'trends';
-  onViewChange: (view: 'analyzer' | 'trends') => void;
+  activeView: ViewType;
+  onViewChange: (view: ViewType) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }) => {
   const linkStyles = "text-sm font-medium text-brand-text-secondary hover:text-brand-text-primary transition-colors";
 
-  const getButtonClass = (view: 'analyzer' | 'trends') => {
-    const baseClasses = "px-4 py-1.5 rounded-full text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-brand-surface";
+  const getButtonClass = (view: ViewType) => {
+    const baseClasses = "px-3 py-1.5 rounded-full text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-brand-surface";
     if (activeView === view) {
       return `${baseClasses} bg-brand-primary text-white shadow-md`;
     }
@@ -30,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }
             </span>
           </div>
           
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-brand-surface p-1 rounded-full border border-brand-border">
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-brand-surface p-1 rounded-full border border-brand-border">
             <button 
               onClick={() => onViewChange('analyzer')}
               className={getButtonClass('analyzer')}
@@ -44,6 +45,20 @@ const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }
               aria-pressed={activeView === 'trends'}
             >
               AI Trends
+            </button>
+            <button 
+              onClick={() => onViewChange('appraiser')}
+              className={getButtonClass('appraiser')}
+              aria-pressed={activeView === 'appraiser'}
+            >
+              Appraiser
+            </button>
+             <button 
+              onClick={() => onViewChange('blog')}
+              className={getButtonClass('blog')}
+              aria-pressed={activeView === 'blog'}
+            >
+              Blog
             </button>
           </div>
 

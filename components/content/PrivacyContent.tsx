@@ -1,49 +1,58 @@
+
 import React from 'react';
 
 const PrivacyContent: React.FC = () => {
   return (
     <div>
       <p className="!mt-0">
-        <strong>Last Updated: {new Date().toLocaleDateString()}</strong>
+        <strong>Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>
       </p>
       <p>
-        Your privacy is important to us. It is Domain Trend Analyzer's policy to respect your privacy regarding any information we may collect from you across our website.
+        Domain Trend Analyzer ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.
       </p>
 
       <h3>1. Information We Collect</h3>
       <p>
-        We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how it will be used. For example, the text you paste into our analyzer is processed to provide the service but is not stored on our servers long-term.
+        We may collect information about you in a variety of ways. The information we may collect on the Site includes:
       </p>
+      <ul>
+        <li>
+            <strong>Derivative Data:</strong> Information our servers automatically collect when you access the Site, such as your IP address, browser type, operating system, access times, and the pages you have viewed directly before and after accessing the Site.
+        </li>
+        <li>
+            <strong>User-Provided Data:</strong> Any text or domain lists that you paste into our analysis tool are processed in real-time to provide the service. This data is not stored or logged on our servers after the analysis is complete. If you choose to contact us via email, we will collect your email address and any information you provide in your message.
+        </li>
+      </ul>
 
       <h3>2. How We Use Your Information</h3>
       <p>
-        We use the information we collect in various ways, including to:
+        Having accurate information permits us to provide you with a smooth, efficient, and customized experience. Specifically, we may use information collected about you via the Site to:
       </p>
       <ul>
-        <li>Provide, operate, and maintain our website</li>
-        <li>Improve, personalize, and expand our website</li>
-        <li>Understand and analyze how you use our website</li>
-        <li>Communicate with you for customer service, updates, and other information relating to the website</li>
+        <li>Provide, operate, and maintain our website and its services.</li>
+        <li>Improve, personalize, and expand our website.</li>
+        <li>Understand and analyze how you use our website.</li>
+        <li>Respond to your comments, questions, and provide customer service.</li>
+        <li>Monitor and analyze usage and trends to improve your experience with the Site.</li>
       </ul>
 
-      <h3>3. Log Files & Cookies</h3>
+      <h3>3. Cookies and Web Beacons</h3>
       <p>
-        Domain Trend Analyzer follows a standard procedure of using log files. We may use cookies and similar tracking technologies to track the activity on our Service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
-      </p>
-
-      <h3>4. Third-Party Services</h3>
-      <p>
-        We may use third-party services such as Google AdSense to serve advertising and Google Analytics to monitor and analyze the use of our Service. These third parties may use cookies to collect information about your visits to this and other websites in order to provide relevant advertisements about goods and services of interest to you.
+        We may use cookies, web beacons, tracking pixels, and other tracking technologies on the Site to help customize the Site and improve your experience. When you access the Site, your personal information is not collected through the use of tracking technology. Most browsers are set to accept cookies by default. You can remove or reject cookies, but be aware that such action could affect the availability and functionality of the Site.
       </p>
       
-      <h3>5. Your Rights</h3>
+      <h3>4. Third-Party Advertising</h3>
       <p>
-        You are free to refuse our request for your personal information, with the understanding that we may be unable to provide you with some of your desired services.
+        We may use third-party advertising companies to serve ads when you visit the Site. These companies, such as Google AdSense, may use information (not including your name, address, email address, or telephone number) about your visits to this and other websites in order to provide advertisements about goods and services of interest to you. If you would like more information about this practice and to know your choices about not having this information used by these companies, see the Network Advertising Initiative's consumer website.
       </p>
 
-      <p className="p-4 bg-red-900/50 border border-red-500 rounded-md mt-6">
-        <em><strong>Disclaimer for AdSense Approval:</strong> This is a generic, placeholder privacy policy. It is <strong>NOT</strong> legal advice. You <strong>must</strong> consult with a legal professional to create a policy that is compliant with laws like GDPR and CCPA and accurately reflects your specific data handling practices. A comprehensive and accurate privacy policy is a strict requirement for AdSense.</em>
+      <h3>5. Security of Your Information</h3>
+      <p>
+        We use administrative, technical, and physical security measures to help protect your information. While we have taken reasonable steps to secure the information you provide to us, please be aware that despite our efforts, no security measures are perfect or impenetrable, and no method of data transmission can be guaranteed against any interception or other type of misuse.
       </p>
+
+      <h3>Contact Us</h3>
+      <p>If you have questions or comments about this Privacy Policy, please contact us at contact@domaintrendanalyzer.com.</p>
     </div>
   );
 };
