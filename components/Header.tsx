@@ -1,15 +1,17 @@
 
 import React from 'react';
-import { DnaIcon } from './icons.tsx';
+import { DnaIcon, KeyIcon, CheckIcon } from './icons.tsx';
 import type { ViewType } from '../types.ts';
 
 interface HeaderProps {
   onLinkClick: (modal: 'about' | 'contact' | 'privacy' | 'terms') => void;
   activeView: ViewType;
   onViewChange: (view: ViewType) => void;
+  aiStatus: 'ready' | 'error';
+  onApiModalOpen: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }) => {
+const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange, aiStatus, onApiModalOpen }) => {
   const linkStyles = "text-sm font-medium text-brand-text-secondary hover:text-brand-text-primary transition-colors";
 
   const getButtonClass = (view: ViewType) => {
@@ -18,6 +20,26 @@ const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }
       return `${baseClasses} bg-brand-primary text-white shadow-md`;
     }
     return `${baseClasses} text-brand-text-secondary hover:bg-brand-bg`;
+  };
+  
+  const AiStatusIndicator: React.FC = () => {
+    if (aiStatus === 'error') {
+      return (
+        <button
+          onClick={onApiModalOpen}
+          className="flex items-center space-x-2 text-sm font-semibold bg-red-500/10 text-red-400 px-3 py-1.5 rounded-full hover:bg-red-500/20 hover:text-red-300 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-brand-surface"
+        >
+          <KeyIcon className="w-4 h-4" />
+          <span>Setup AI</span>
+        </button>
+      );
+    }
+    return (
+      <div className="flex items-center space-x-2 text-sm font-semibold bg-green-500/10 text-green-400 px-3 py-1.5 rounded-full">
+        <CheckIcon className="w-4 h-4" />
+        <span>AI Active</span>
+      </div>
+    );
   };
 
   return (
@@ -62,11 +84,14 @@ const Header: React.FC<HeaderProps> = ({ onLinkClick, activeView, onViewChange }
             </button>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-6">
-            <button onClick={() => onLinkClick('about')} className={linkStyles}>About</button>
-            <button onClick={() => onLinkClick('privacy')} className={linkStyles}>Privacy</button>
-            <button onClick={() => onLinkClick('terms')} className={linkStyles}>Terms</button>
-          </nav>
+          <div className="flex items-center space-x-4 md:space-x-6">
+             <AiStatusIndicator />
+             <nav className="hidden md:flex items-center space-x-6">
+                <button onClick={() => onLinkClick('about')} className={linkStyles}>About</button>
+                <button onClick={() => onLinkClick('privacy')} className={linkStyles}>Privacy</button>
+                <button onClick={() => onLinkClick('terms')} className={linkStyles}>Terms</button>
+             </nav>
+          </div>
         </div>
       </div>
     </header>

@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { getGoogleAI } from '../services/aiService.ts';
 import { LoaderIcon, SparklesIcon, AlertTriangleIcon, TrendingUpIcon, BuildingIcon } from './icons.tsx';
 import TrendListItem from './TrendListItem.tsx';
 import GeneratedDomainListItem from './GeneratedDomainListItem.tsx';
@@ -40,7 +41,11 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
     setGeneratedDomains([]);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      const ai = getGoogleAI();
+      if (!ai) {
+          setError("AI Service is not configured. Please contact the administrator.");
+          return;
+      }
       const responseSchema = {
         type: Type.OBJECT, properties: { trends: { type: Type.ARRAY, description: "A list of trending keywords.", items: { type: Type.OBJECT, properties: { keyword: { type: Type.STRING, description: "The trending keyword, must be a single lowercase word." }, score: { type: Type.INTEGER, description: "A trend score from 1 to 50, representing current market value." } } } } } };
       const prompt = `You are a market trend analyst. Your task is to identify the top 20 most valuable and currently trending keywords for new domain registrations, based on the very latest world news and emerging global events. Focus on keywords that have suddenly become relevant due to recent news in technology, science, culture, and business. For each keyword, provide a 'trend score' from 1 to 50, where 50 represents the absolute highest potential and demand right now. Return the list in JSON format.`;
@@ -67,7 +72,11 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
     setIndustriesError(null);
     setIndustries([]);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      const ai = getGoogleAI();
+      if (!ai) {
+          setIndustriesError("AI Service is not configured. Please contact the administrator.");
+          return;
+      }
       const responseSchema = { type: Type.OBJECT, properties: { industries: { type: Type.ARRAY, description: 'A list of 10 booming industry names.', items: { type: Type.STRING } } } };
       const prompt = `Based on real-time market data and global news, list the top 10 highest-growth, "booming" industries right now. Examples might be 'AI Drug Discovery', 'Sustainable Aviation Fuel', or 'Personalized Nutrition Platforms'. Provide only a list of industry names.`;
       const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt, config: { responseMimeType: "application/json", responseSchema } });
@@ -77,7 +86,7 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
       } else { throw new Error("Invalid industry data from AI."); }
     } catch (e) {
       console.error(e);
-      setIndustriesError("Failed to fetch booming industries.");
+      setIndustriesError("Could not fetch industries. Please check your API key and try again.");
     } finally {
       setIsFetchingIndustries(false);
     }
@@ -96,7 +105,11 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
     setGenerationError(null);
     setGeneratedDomains([]);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      const ai = getGoogleAI();
+      if (!ai) {
+          setGenerationError("AI Service is not configured. Please contact the administrator.");
+          return;
+      }
       const responseSchema = { type: Type.OBJECT, properties: { domains: { type: Type.ARRAY, items: { type: Type.STRING } } } };
       const prompt = `Generate 25 creative, brandable domain names. Each domain name must contain exactly two English words. One word should be descriptive of the trend(s): "${selectedTrends.join(', ')}". The other word must be descriptive of the industry: "${industry}". The domain names must be valuable, trendy, and descriptive. The domain names must end with one of these TLDs: ${selectedTlds.join(', ')}. The final output must be a valid JSON object with a 'domains' key containing an array of lowercase strings.`;
       const response = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt, config: { responseMimeType: "application/json", responseSchema } });
@@ -121,7 +134,7 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
       } else { throw new Error("Invalid response format from AI."); }
     } catch (e) {
       console.error(e);
-      setGenerationError("Could not generate domains. The AI might be busy, please try again.");
+      setGenerationError("Could not generate domains. Please check your API key and try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -147,7 +160,7 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
               </button>
             </div>
             {isFetching && <div className="grid grid-cols-1 md:grid-cols-2 gap-2">{[...Array(6)].map((_, i) => <div key={i} className="animate-pulse h-16 bg-brand-bg rounded-lg"></div>)}</div>}
-            {error && <p className="text-red-400 text-center">{error}</p>}
+            {error && <div className="flex items-center justify-center text-red-400 p-4 bg-red-500/10 rounded-md"><AlertTriangleIcon className="w-5 h-5 mr-3" />{error}</div>}
             {!isFetching && !error && trends.length > 0 && 
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {trends.map((trend, index) => <TrendListItem key={trend.keyword} rank={index + 1} keyword={trend.keyword} score={trend.score} isSelected={selectedTrends.includes(trend.keyword)} onClick={() => handleTrendSelect(trend.keyword)} />)}
@@ -176,7 +189,7 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
                 </button>
               </div>
               {isGenerating && <div className="space-y-2 mt-4">{[...Array(5)].map((_, i) => <div key={i} className="animate-pulse h-12 bg-brand-bg rounded-lg"></div>)}</div>}
-              {generationError && <p className="text-red-400 text-center mt-4">{generationError}</p>}
+              {generationError && <div className="flex items-center justify-center text-red-400 p-4 bg-red-500/10 rounded-md mt-4"><AlertTriangleIcon className="w-5 h-5 mr-3" />{generationError}</div>}
               {generatedDomains.length > 0 && (
                 <ul className="space-y-2 mt-4">
                   {generatedDomains.map(domain => <GeneratedDomainListItem key={domain} domain={domain} initialStatus="AVAILABLE" />)}
@@ -196,7 +209,7 @@ const AITrendExplorer: React.FC<AITrendExplorerProps> = ({ onTrendsFetched }) =>
               </button>
             </div>
             {isFetchingIndustries && <div className="space-y-2">{[...Array(5)].map((_, i) => <div key={i} className="animate-pulse h-8 bg-brand-bg rounded-lg"></div>)}</div>}
-            {industriesError && <p className="text-red-400 text-center">{industriesError}</p>}
+            {industriesError && <div className="flex items-center justify-center text-red-400 p-4 bg-red-500/10 rounded-md"><AlertTriangleIcon className="w-5 h-5 mr-3" />{industriesError}</div>}
             {!isFetchingIndustries && !industriesError && industries.length > 0 && 
               <ul className="space-y-2">
                 {industries.map((ind, i) => (

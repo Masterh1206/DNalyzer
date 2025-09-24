@@ -119,7 +119,7 @@ const DomainGenerator: React.FC<DomainGeneratorProps> = ({ trendingDomains, isLo
 
     } catch (e) {
         console.error(e);
-        setError("Could not generate domains. The AI might be busy, please try again.");
+        setError("Could not generate domains. Please check your API key and try again.");
         setGeneratedDomains([]);
     } finally {
         setIsGenerating(false);

@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import type { TrendingDomain, AIAnalysisResult } from '../types.ts';
 import { checkDomainAvailability } from '../services/domainAvailability.ts';
 import { REGISTRAR_URLS } from '../constants.ts';
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { getGoogleAI } from '../services/aiService.ts';
 import { ZapIcon, CheckIcon, GlobeIcon, LoaderIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon, AlertTriangleIcon } from './icons.tsx';
 
 interface KeywordListItemProps {
@@ -59,7 +61,12 @@ const KeywordListItem: React.FC<KeywordListItemProps> = ({ domain, rank, onUpdat
     setIsAnalyzing(true);
     setAnalysisError(null);
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+        const ai = getGoogleAI();
+        if (!ai) {
+            setAnalysisError("AI Service is not configured.");
+            return;
+        }
+
         const responseSchema = {
             type: Type.OBJECT,
             properties: {
@@ -86,7 +93,7 @@ const KeywordListItem: React.FC<KeywordListItemProps> = ({ domain, rank, onUpdat
 
     } catch (e) {
         console.error("AI Analysis Error:", e);
-        setAnalysisError("AI analysis failed. Please try again.");
+        setAnalysisError("AI analysis failed. Please check your API key and try again.");
     } finally {
         setIsAnalyzing(false);
     }

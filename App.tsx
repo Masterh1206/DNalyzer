@@ -17,9 +17,11 @@ import { analyzeDomains } from './services/domainAnalyzer.ts';
 import type { TrendingDomain, BlogPostMeta, ViewType } from './types.ts';
 // FIX: Corrected typo from SAMPLE_DOMINS to SAMPLE_DOMAINS.
 import { SAMPLE_DOMAINS } from './constants.ts';
-import { LightbulbIcon, ClockIcon, SparklesIcon, TrendingUpIcon, ScanIcon } from './components/icons.tsx';
+import { LightbulbIcon, ClockIcon, SparklesIcon, TrendingUpIcon, ScanIcon, AlertTriangleIcon } from './components/icons.tsx';
 import AITrendExplorer from './components/AITrendExplorer.tsx';
 import DomainAppraiser from './components/DomainAppraiser.tsx';
+import { getAIStatus } from './services/aiService.ts';
+import ApiKeyInstructionsModal from './components/ApiKeyInstructionsModal.tsx';
 
 type ModalType = 'about' | 'contact' | 'privacy' | 'terms' | 'disclaimer';
 
@@ -33,6 +35,9 @@ const App: React.FC = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<ViewType>('analyzer');
   const [currentPost, setCurrentPost] = useState<BlogPostMeta | null>(null);
+  const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
+  
+  const { status: aiStatus, error: aiError } = getAIStatus();
 
   useEffect(() => {
     try {
@@ -130,10 +135,25 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
+      {aiStatus === 'error' && (
+        <div 
+            className="bg-yellow-900/50 border-b border-yellow-700 text-yellow-300 text-center p-2 text-sm font-medium"
+            role="alert"
+        >
+            <button onClick={() => setIsApiModalOpen(true)} className="flex items-center justify-center w-full hover:underline focus:outline-none focus:underline">
+                <AlertTriangleIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span>
+                    <strong>AI Service Error:</strong> {aiError} Click here for setup instructions.
+                </span>
+            </button>
+        </div>
+      )}
       <Header 
         onLinkClick={handleModalOpen}
         activeView={activeView}
         onViewChange={handleViewChange}
+        aiStatus={aiStatus}
+        onApiModalOpen={() => setIsApiModalOpen(true)}
       />
       <main className="flex-grow">
         
@@ -261,6 +281,9 @@ const App: React.FC = () => {
         <Modal title={getModalTitle()} onClose={() => setActiveModal(null)}>
             {renderModalContent()}
         </Modal>
+      )}
+      {isApiModalOpen && (
+        <ApiKeyInstructionsModal onClose={() => setIsApiModalOpen(false)} />
       )}
     </div>
   );

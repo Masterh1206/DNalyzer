@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { getGoogleAI } from '../services/aiService.ts';
 import { LoaderIcon, SparklesIcon, ScaleIcon, AlertTriangleIcon } from './icons.tsx';
 
 const AppraisalResult: React.FC<{ result: string }> = ({ result }) => {
@@ -42,7 +42,12 @@ const DomainAppraiser: React.FC = () => {
     setAppraisal(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      const ai = getGoogleAI();
+      if (!ai) {
+        setError("AI Service is not configured. Please contact the administrator.");
+        return;
+      }
+
       const prompt = `You are a senior domain name appraiser specializing in aftermarket valuations. Act as if you are providing a professional domain bin appraisal similar to DNrater.com.
 
 For the domain name "${domain.trim()}", deliver a complete appraisal that includes the following sections, precisely in this format:
@@ -86,7 +91,7 @@ The tone must be professional, concise, and data-driven, exactly like an apprais
 
     } catch (e) {
       console.error("AI Appraisal Error:", e);
-      setError("AI appraisal failed. The model may be busy or the domain is too obscure. Please try again.");
+      setError("AI appraisal failed. Please check your API key and try again.");
     } finally {
       setIsAppraising(false);
     }
