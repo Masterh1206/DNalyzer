@@ -17,11 +17,11 @@ import { analyzeDomains } from './services/domainAnalyzer.ts';
 import type { TrendingDomain, BlogPostMeta, ViewType } from './types.ts';
 // FIX: Corrected typo from SAMPLE_DOMINS to SAMPLE_DOMAINS.
 import { SAMPLE_DOMAINS } from './constants.ts';
-import { LightbulbIcon, ClockIcon, SparklesIcon, TrendingUpIcon, ScanIcon, AlertTriangleIcon } from './components/icons.tsx';
+import { LightbulbIcon, ClockIcon, SparklesIcon, TrendingUpIcon, ScanIcon } from './components/icons.tsx';
 import AITrendExplorer from './components/AITrendExplorer.tsx';
 import DomainAppraiser from './components/DomainAppraiser.tsx';
-import { getAIStatus } from './services/aiService.ts';
-import ApiKeyInstructionsModal from './components/ApiKeyInstructionsModal.tsx';
+import { getApiKey } from './services/aiService.ts';
+import ApiKeySetupModal from './components/ApiKeySetupModal.tsx';
 
 type ModalType = 'about' | 'contact' | 'privacy' | 'terms' | 'disclaimer';
 
@@ -36,10 +36,15 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewType>('analyzer');
   const [currentPost, setCurrentPost] = useState<BlogPostMeta | null>(null);
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
-  
-  const { status: aiStatus, error: aiError } = getAIStatus();
+  const [aiStatus, setAiStatus] = useState<'ready' | 'error'>('error');
+
+  const handleApiKeyUpdate = useCallback(() => {
+    const key = getApiKey();
+    setAiStatus(key ? 'ready' : 'error');
+  }, []);
 
   useEffect(() => {
+    handleApiKeyUpdate(); // Check on initial load
     try {
         const hasAccepted = localStorage.getItem('hasAcceptedWelcome');
         if (!hasAccepted) {
@@ -49,7 +54,7 @@ const App: React.FC = () => {
         console.error("Could not access localStorage:", error);
         setShowWelcomeModal(false);
     }
-  }, []);
+  }, [handleApiKeyUpdate]);
 
   const handleAnalysis = useCallback(() => {
     setIsLoading(true);
@@ -135,19 +140,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
-      {aiStatus === 'error' && (
-        <div 
-            className="bg-yellow-900/50 border-b border-yellow-700 text-yellow-300 text-center p-2 text-sm font-medium"
-            role="alert"
-        >
-            <button onClick={() => setIsApiModalOpen(true)} className="flex items-center justify-center w-full hover:underline focus:outline-none focus:underline">
-                <AlertTriangleIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>
-                    <strong>AI Service Error:</strong> {aiError} Click here for setup instructions.
-                </span>
-            </button>
-        </div>
-      )}
       <Header 
         onLinkClick={handleModalOpen}
         activeView={activeView}
@@ -283,7 +275,10 @@ const App: React.FC = () => {
         </Modal>
       )}
       {isApiModalOpen && (
-        <ApiKeyInstructionsModal onClose={() => setIsApiModalOpen(false)} />
+        <ApiKeySetupModal 
+          onClose={() => setIsApiModalOpen(false)}
+          onApiKeyUpdate={handleApiKeyUpdate}
+        />
       )}
     </div>
   );

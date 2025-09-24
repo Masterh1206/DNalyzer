@@ -2,50 +2,92 @@
 import { GoogleGenAI } from "@google/genai";
 
 let aiInstance: GoogleGenAI | null = null;
-let isInitialized = false;
-let aiStatus: 'ready' | 'error' = 'ready';
-let aiError: string | null = null;
+let currentApiKey: string | null = null;
+
+const API_KEY_STORAGE_KEY = 'gemini_api_key';
 
 /**
- * Initializes and returns a singleton instance of the GoogleGenAI client.
- * It strictly relies on the `process.env.API_KEY` environment variable.
- * If the API key is not found, it logs a critical error to the console
- * and returns null, allowing the application to gracefully disable AI features.
+ * Retrieves the user's API key from local storage.
+ * @returns {string | null} The API key or null if not found.
+ */
+export const getApiKey = (): string | null => {
+  try {
+    return localStorage.getItem(API_KEY_STORAGE_KEY);
+  } catch (e) {
+    console.error("Could not access localStorage:", e);
+    return null;
+  }
+};
+
+/**
+ * Saves the user's API key to local storage.
+ * @param {string} key The API key to save.
+ */
+export const saveApiKey = (key: string): void => {
+  try {
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+    // Invalidate the current AI instance so it gets re-created with the new key
+    aiInstance = null;
+    currentApiKey = key;
+  } catch (e) {
+    console.error("Could not write to localStorage:", e);
+  }
+};
+
+/**
+ * Clears the user's API key from local storage.
+ */
+export const clearApiKey = (): void => {
+  try {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    aiInstance = null;
+    currentApiKey = null;
+  } catch (e) {
+    console.error("Could not remove from localStorage:", e);
+  }
+};
+
+/**
+ * Initializes and returns a singleton instance of the GoogleGenAI client
+ * based on the key stored in local storage.
  * @returns {GoogleGenAI | null} The initialized client or null if the API key is missing.
  */
 export const getGoogleAI = (): GoogleGenAI | null => {
-  if (isInitialized) {
-    return aiInstance;
-  }
+  const storedKey = getApiKey();
 
-  isInitialized = true; // Attempt initialization only once.
-
-  const apiKey = process.env.API_KEY;
-
-  if (!apiKey) {
-    console.error(
-      "%cAI Service Critical Error: The 'API_KEY' environment variable is not set. This is required for all AI features to function. Please ensure this variable is configured in your deployment environment.",
-      "color: red; font-weight: bold; font-size: 14px;"
-    );
-    aiInstance = null;
-    aiStatus = 'error';
-    aiError = "The 'API_KEY' environment variable is not configured in your hosting environment.";
+  // If there's no key, there's no AI instance.
+  if (!storedKey) {
+    if (aiInstance) aiInstance = null;
+    if (currentApiKey) currentApiKey = null;
     return null;
   }
-
-  aiInstance = new GoogleGenAI({ apiKey });
-  aiStatus = 'ready';
-  return aiInstance;
+  
+  // If an instance exists and it was created with the current key, return it.
+  if (aiInstance && storedKey === currentApiKey) {
+    return aiInstance;
+  }
+  
+  // Otherwise, create a new instance with the stored key.
+  try {
+    const newInstance = new GoogleGenAI({ apiKey: storedKey });
+    aiInstance = newInstance;
+    currentApiKey = storedKey;
+    return aiInstance;
+  } catch (error) {
+    console.error("Failed to initialize GoogleGenAI. The API key might be invalid.", error);
+    // If initialization fails (e.g., malformed key), clear it to prevent repeated errors.
+    clearApiKey();
+    return null;
+  }
 };
 
 /**
  * Returns the status of the AI service initialization.
- * This function will trigger initialization if it hasn't happened yet.
  * @returns {{status: 'ready' | 'error', error: string | null}} The current status of the AI service.
  */
 export const getAIStatus = (): { status: 'ready' | 'error', error: string | null } => {
-  if (!isInitialized) {
-    getGoogleAI(); // Ensures the initialization logic runs once.
+  if (getApiKey()) {
+    return { status: 'ready', error: null };
   }
-  return { status: aiStatus, error: aiError };
+  return { status: 'error', error: "Gemini API key is not set." };
 };
